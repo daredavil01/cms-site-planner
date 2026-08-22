@@ -1,0 +1,14 @@
+{
+  "name": "cms-site-planner",
+  "owner": { "name": "daredavil01" },
+  "metadata": {
+    "description": "Planning tools for CMS-backed websites on Astro + Cloudflare Workers + Supabase."
+  },
+  "plugins": [
+    {
+      "name": "cms-site-planner",
+      "source": "./",
+      "description": "Plan a new CMS-backed website on Astro + Cloudflare Workers + Supabase: phased implementation plan, project rules, and the status/changelog/lessons trio."
+    }
+  ]
+}

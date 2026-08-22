@@ -1,0 +1,14 @@
+{
+  "name": "cms-site-planner",
+  "description": "Turns a website brief into a phased development plan and the tracking documents that keep the build honest, for CMS-backed sites on Astro + Cloudflare Workers + Supabase.",
+  "version": "0.1.0",
+  "author": { "name": "daredavil01" },
+  "keywords": [
+    "astro",
+    "supabase",
+    "cloudflare",
+    "cms",
+    "planning",
+    "scaffolding"
+  ]
+}
