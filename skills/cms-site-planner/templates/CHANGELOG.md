@@ -19,7 +19,8 @@ already has the *what*, and **the why matters more**. Record the failures too: a
 is a debugging tool, a promotional one is not.
 
 What belongs here: user-visible changes, bugs that were subtle, decisions that diverged from the
-plan, and anything security-relevant — RLS, the privileged-credential boundary, the admin gate.
+plan, and anything security-relevant — the access boundary, credentials, the staff gate, personal
+data.
 Not every refactor; `git log` records those better.
 
 What belongs in [`lessons.md`](lessons.md) instead: what was *learned*, including from work that
@@ -33,9 +34,9 @@ never shipped. The two files overlap on purpose.
 
 ### Added
 - **Project documents.** [`implementation_plan.md`](implementation_plan.md) with
-  {{PHASE_COUNT}} phases, [`CLAUDE.md`](CLAUDE.md) carrying the rules that apply to the modules
-  selected ({{MODULE_LIST}}), this changelog, [`status.md`](status.md) and
-  [`lessons.md`](lessons.md).
+  {{PHASE_COUNT}} phases on the `{{STACK}}` stack, [`CLAUDE.md`](CLAUDE.md) carrying the rules that
+  apply to that stack and the modules selected ({{MODULE_LIST}}), this changelog,
+  [`status.md`](status.md), [`deployment.md`](deployment.md) and [`lessons.md`](lessons.md).
 
 ### Notes
 - {{Any assumption applied because the brief was silent. Each one is also an open item in

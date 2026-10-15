@@ -74,6 +74,12 @@ blank `alt` attribute instead of the other language.
 **Rule.** Set a per-image byte ceiling in the plan, derived from the hosting tier, and shrink
 images in the browser before upload.
 
+**What the ceiling protects depends on the stack.** On `supabase`, it protects the transfer
+allowance, and everything below applies in full. On `cloudflare`, object-storage egress is free and
+images are copied into the build and served as static assets, so the ceiling protects **page weight**
+— LCP on a phone on a slow network — rather than a bill; derive it from the performance target
+instead. Shrink in the browser on both.
+
 The arithmetic that matters:
 
 ```
@@ -99,8 +105,9 @@ ceasing to load.
 can be re-derived when traffic changes.
 
 **Where the shrinking runs.** In the browser, and a server endpoint would be worse than useless:
-it protects nothing — RLS decides who may write either way — and the obvious server implementation
-cannot exist, because the production runtime has no `document`, no `Image` and no 2D canvas. The
+it protects nothing — access control decides who may write either way — and the obvious server
+implementation cannot exist, because the production runtime has no `document`, no `Image` and no 2D
+canvas. The
 browser is the only machine in the request path with a layout engine, and the file is already in
 its memory.
 
@@ -113,6 +120,18 @@ its memory.
 - **Anything already small enough**, which is the rule that keeps a payment QR code bit-identical:
   it is the one image where a compression artefact costs real money, and there were no bytes there
   to save.
+
+**How the shrinking runs without a client framework.** Decode with `createImageBitmap` (it follows
+EXIF orientation), draw to a canvas, `toBlob('image/webp')`, and put the result back into the file
+input through a `DataTransfer`, so the form submits normally and server-rendered error pages keep
+working — no `fetch`, no upload API. Re-encoding drops EXIF, including GPS location. The admin CSP
+needs `img-src blob:` for the before/after preview. Some formats decode only in some browsers (HEIC
+in Safari); fall back to the original.
+
+**The server trusts nothing the browser computed.** It re-checks type, size and dimensions by reading
+the file's own header, and hashes the bytes (SHA-256) to detect duplicates. *Evidence:* a canvas-made
+JPEG placed into the input with `DataTransfer` and a `change` event exercises the whole optimiser in
+a browser test; in a Node test, a minimal valid image header is enough to pass the server's checks.
 
 **Nothing in that path may refuse an upload for a reason that is not the editor's problem.** A file
 that will not decode, a browser without `createImageBitmap`, an encoder that returns something
@@ -141,3 +160,42 @@ the dialog must say which one it is. Boilerplate confirmation text hides exactly
 *Why:* an unpublished-by-default media row is right for consent — nobody's photograph goes public
 by accident — and it means an editor who uploads an image and selects it sees nothing appear on
 the site, with no error anywhere. Both halves are invisible. Make the state visible on the card.
+
+## 7. Documents: compress in the browser, check on the server, serve through a route
+
+Applies when editors upload PDFs or other documents.
+
+**Rule.** Compress PDFs in the browser only when one is chosen, strip their metadata, and keep the
+original if compression makes it larger. On the server, refuse anything that is not a real PDF,
+exceeds the ceiling, or contains active content. Serve documents through a route rather than a
+public bucket.
+
+*Evidence:*
+
+- **A WebAssembly Ghostscript build** in a Web Worker does the compression (its "ebook" preset keeps
+  text sharp). It is large (around 16 MB) and AGPL-licensed — load it only in the admin, only when a
+  PDF is chosen, and record the licence decision. Running it in a worker script, which is a static
+  asset, needs no `wasm-unsafe-eval` in the page CSP.
+- **Metadata stripping is incomplete by default.** The rewrite copies author, title, keywords, XMP
+  and bookmarks — including a bookmark's JavaScript action. Drop outlines and empty the document info
+  explicitly, then test the arguments against a PDF built with those fields before trusting them.
+- **Scanning for scripts by bytes needs care.** `/JS` alone matches random binary about once per
+  5 MB; look for `/S /JavaScript`, `/Launch`, `/EmbeddedFiles`, `/RichMedia` and `/XFA` after
+  decoding `#xx` name escapes and inflating compressed object streams. **Refuse what you cannot read**
+  (unknown filters, encryption) rather than pass it.
+- **Serving through a route** (`/dl/<id>`) means hiding or replacing a file needs no rebuild, needs no
+  public bucket, and can count downloads per day without recording anything about the person.
+
+## 8. Images on the page
+
+**Rule.** Check the format the image component actually falls back to, and give anchor targets room
+below sticky headers.
+
+*Evidence:*
+
+- Astro's `<Picture>` defaulted its fallback `<img>` to **PNG** for a WebP source — a 2 MB file for a
+  photo. Set `formats={['avif']}` and `fallbackFormat="webp"`. A `class` passed to `<Picture>` lands
+  on the `img`, not the `picture`; wrap it for layout.
+- **Lazy images move anchor links.** A `#section` link lands correctly only if the images above it
+  have loaded; `loading="lazy"` images load later and push the heading away. Give anchors
+  `scroll-margin-top` below any sticky header, and do not lazy-load images above common anchors.

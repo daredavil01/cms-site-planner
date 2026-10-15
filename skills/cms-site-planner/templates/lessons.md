@@ -14,7 +14,8 @@ to be wrong, add a new entry correcting it and link back.
 > **This file records learnings, never rules.** A rule lives in [`CLAUDE.md`](CLAUDE.md). When a
 > lesson here hardens into something worth enforcing, **promote it into `CLAUDE.md`** and fill in
 > this entry's `Promoted:` line. A lesson that never gets promoted is still worth keeping — most
-> of them are context, not policy.
+> of them are context, not policy. A lesson **never overrides** the requirement documents or
+> `CLAUDE.md`; if it contradicts them, raise it as a decision in [`status.md`](status.md).
 >
 > Deliberately overlapping [`CHANGELOG.md`](CHANGELOG.md): the changelog records **what shipped**.
 > This records **what was learned**, including from work that never shipped.
@@ -38,7 +39,12 @@ discussion; "React felt heavy" starts one.
 
 Write an entry when something surprised you, when a plan turned out to be wrong, when a fix took
 longer than it should have, or when you were corrected. Not once a phase, on a schedule — those
-entries are always the thin ones.
+entries are always the thin ones. But do end every session by asking whether anything surprised
+you; most sessions on a new stack produce several.
+
+Several small lessons from one session can share one dated heading as bullets — a bold one-line
+claim first, then what happened, the fix, and what to do next time — as long as each keeps its
+trigger.
 
 ---
 
